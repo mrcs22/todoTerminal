@@ -1,18 +1,17 @@
 import readlineSync from "readline-sync";
 import chalk from "chalk";
+import fs from "fs";
+import { exit } from "process";
+
 const options = ["add", "list", "remove", "check"];
 
-const terminalTodoLine = chalk.bold(
+const terminalTodoHeader = chalk.bold(
   `${chalk.green("### TERMINAL")} ${chalk.magenta("T")}${chalk.red(
     "O"
   )}${chalk.yellow("D")}${chalk.blue("O")} ${chalk.green("###")}`
 );
 
-let bruteList = [
-  { task: "codar", checked: false },
-  { task: "comer", checked: false },
-  { task: "dormir", checked: false },
-];
+let bruteList = getTasksList();
 
 let displayList = null;
 
@@ -20,28 +19,47 @@ start();
 
 function start() {
   console.clear();
-  console.log(terminalTodoLine);
-  renderDisplayList();
+  console.log(terminalTodoHeader);
+
+  displayList = getDisplayList();
 
   const selectedOption = readlineSync.keyInSelect(
     options,
     "What do you want to do?"
   );
 
-  performSelectedOption(selectedOption);
+  performSelectedOption(selectedOption, true);
 }
 
-function renderDisplayList() {
+function getTasksList() {
+  return fs.existsSync("./tasks.json")
+    ? JSON.parse(fs.readFileSync("./tasks.json")).tasks
+    : [];
+}
+
+function getDisplayList() {
   const checked = "🟢 ";
   const unChecked = "🔴 ";
 
-  displayList = bruteList.map((i) =>
+  return bruteList.map((i) =>
     i.checked ? checked + i.task + "\n" : unChecked + i.task + "\n"
   );
 }
 
-function performSelectedOption(option) {
+function performSelectedOption(option, isThisStart) {
   console.clear();
+  console.log(terminalTodoHeader);
+
+  if (option === -1) {
+    if (!!isThisStart) {
+      console.clear();
+      process.exit(0);
+    } else {
+      start();
+      return;
+    }
+  }
+
   const options = [addTask, listTasks, removeTask, checkOrUncheckTask];
   options[option]();
 }
@@ -68,30 +86,53 @@ function addTask() {
     task: newTask,
     checked: false,
   });
-
-  console.log("Success!");
-  setTimeout(start, 2000);
+  fs.writeFileSync("./tasks.json", JSON.stringify({ tasks: bruteList }));
+  console.log("Success!!");
+  setTimeout(start, 1000);
 }
 function removeTask() {
+  if (displayList.length === 0) {
+    console.log("There's no tasks here");
+    setTimeout(start, 1000);
+    return;
+  }
+
   const selectedTask = readlineSync.keyInSelect(
     displayList,
     "What todo do you want to remove?"
   );
 
   bruteList = bruteList.filter((t, i) => i !== selectedTask);
-  console.log("Success!");
-  setTimeout(start, 2000);
+  fs.writeFileSync("./tasks.json", JSON.stringify({ tasks: bruteList }));
+
+  console.log("Success!!");
+
+  setTimeout(start, 1000);
 }
+
 function checkOrUncheckTask() {
+  if (displayList.length === 0) {
+    console.log("There's no tasks here");
+    setTimeout(start, 1000);
+    return;
+  }
+
   const selectedTask = readlineSync.keyInSelect(
     displayList,
     "What todo do you want to check/uncheck?"
   );
 
+  if (selectedTask === -1) {
+    start();
+    return;
+  }
   bruteList[selectedTask].checked = !bruteList[selectedTask].checked;
-  renderDisplayList();
+
+  displayList = getDisplayList();
   console.clear();
   listTasks();
+
+  fs.writeFileSync("./tasks.json", JSON.stringify({ tasks: bruteList }));
 
   setTimeout(start, 2000);
 }
