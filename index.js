@@ -1,6 +1,12 @@
 import readlineSync from "readline-sync";
-
+import chalk from "chalk";
 const options = ["add", "list", "remove", "check"];
+
+const terminalTodoLine = chalk.bold(
+  `${chalk.green("### TERMINAL")} ${chalk.magenta("T")}${chalk.red(
+    "O"
+  )}${chalk.yellow("D")}${chalk.blue("O")} ${chalk.green("###")}`
+);
 
 let bruteList = [
   { task: "codar", checked: false },
@@ -14,7 +20,7 @@ start();
 
 function start() {
   console.clear();
-  console.log("### TERMINAL TODO ###");
+  console.log(terminalTodoLine);
   renderDisplayList();
 
   const selectedOption = readlineSync.keyInSelect(
@@ -41,7 +47,7 @@ function performSelectedOption(option) {
 }
 
 function listTasks() {
-  console.log("### TERMINAL TODO ###");
+  console.log();
   const horizontalLine = "==========================\n";
 
   console.log(horizontalLine);
@@ -76,4 +82,16 @@ function removeTask() {
   console.log("Success!");
   setTimeout(start, 2000);
 }
-function checkOrUncheckTask() {}
+function checkOrUncheckTask() {
+  const selectedTask = readlineSync.keyInSelect(
+    displayList,
+    "What todo do you want to check/uncheck?"
+  );
+
+  bruteList[selectedTask].checked = !bruteList[selectedTask].checked;
+  renderDisplayList();
+  console.clear();
+  listTasks();
+
+  setTimeout(start, 2000);
+}
