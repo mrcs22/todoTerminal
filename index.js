@@ -2,7 +2,7 @@ import readlineSync from "readline-sync";
 
 const options = ["add", "list", "remove", "check"];
 
-const bruteList = [
+let bruteList = [
   { task: "codar", checked: false },
   { task: "comer", checked: false },
   { task: "dormir", checked: false },
@@ -13,6 +13,7 @@ let displayList = null;
 start();
 
 function start() {
+  console.clear();
   console.log("### TERMINAL TODO ###");
   renderDisplayList();
 
@@ -20,7 +21,7 @@ function start() {
     options,
     "What do you want to do?"
   );
-  console.clear();
+
   performSelectedOption(selectedOption);
 }
 
@@ -34,6 +35,7 @@ function renderDisplayList() {
 }
 
 function performSelectedOption(option) {
+  console.clear();
   const options = [addTask, listTasks, removeTask, checkOrUncheckTask];
   options[option]();
 }
@@ -46,7 +48,12 @@ function listTasks() {
   displayList.forEach((i) => console.log(i));
   console.log(horizontalLine);
 
-  start();
+  const selectedOption = readlineSync.keyInSelect(
+    options,
+    "What do you want to do?"
+  );
+
+  performSelectedOption(selectedOption);
 }
 
 function addTask() {
@@ -59,5 +66,14 @@ function addTask() {
   console.log("Success!");
   setTimeout(start, 2000);
 }
-function removeTask() {}
+function removeTask() {
+  const selectedTask = readlineSync.keyInSelect(
+    displayList,
+    "What todo do you want to remove?"
+  );
+
+  bruteList = bruteList.filter((t, i) => i !== selectedTask);
+  console.log("Success!");
+  setTimeout(start, 2000);
+}
 function checkOrUncheckTask() {}
