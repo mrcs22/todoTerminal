@@ -49,6 +49,15 @@ function listTasks() {
   start();
 }
 
-function addTask() {}
+function addTask() {
+  const newTask = readlineSync.question("What task do you want to add?");
+  bruteList.push({
+    task: newTask,
+    checked: false,
+  });
+
+  console.log("Success!");
+  setTimeout(start, 2000);
+}
 function removeTask() {}
 function checkOrUncheckTask() {}
